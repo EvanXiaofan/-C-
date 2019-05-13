@@ -1,0 +1,250 @@
+#include<stdio.h>
+#include<string.h>
+#include<stdlib.h>  
+struct booklist //建立图书信息变量的结构体
+{   
+ char writer[20];    /*作者名*/
+ char bookname[20];   /*书名*/
+ char press[20];   /*出版单位*/
+ char time[15];    /*出版时间*/
+ char number[10];   /*登陆号*/
+ float price;     /*价格*/
+ char classfy[10];    /*分类号*/
+ struct booklist * next; /*链表的指针域*/
+}; 
+   
+struct booklist *CreateBK();  /*新建链表*/
+void Insert(struct booklist *head); /*录入*/
+void Delete(struct booklist *head,int num);/*删除*/
+void Look(struct booklist *head);/*浏览*/
+void Search(struct booklist *head); /*查询*/
+void Store(struct booklist *head);/*保存数据至文件*/
+  
+/*新建链表头节点*/
+struct booklist *CreateBK() 
+{ 
+ struct booklist *head;//建立头节点指针 
+ head=(struct booklist *)malloc(sizeof(struct booklist)); /*分配头节点空间*/
+ head->next=NULL; /*头节点指针域初始化，定为空*/
+ return head; 
+} 
+  
+/*保存数据至文件*/
+void Store(struct booklist *head) 
+{ 
+ struct booklist *p; 
+ FILE *fp; 
+ p=head; 
+ fp=fopen("data.txt","w+"); /*以可读可写方式新建并打开 data.txt文件*/
+ if(fp==NULL)        //判断文件是否可以打开
+ {
+ printf("打开文件错误!");
+ return;
+ }
+ fprintf(fp,"┃登录号┃ 书 名 ┃ 作  者┃ 出版单位 ┃ 出版时间 ┃分类号┃ 价格 ┃\n"); 
+ /*指针从头节点开始移动，遍历至尾结点，依次输出图书信息*/
+ while(p->next!=NULL) 
+ { 
+ p=p->next; 
+ fprintf(fp,"┃%s     ┃%s    ┃%s    ┃%s    ┃%s   ┃%s   ┃%f       ┃\n",p->number,p->bookname,p->writer,p->press,p->time,p->classfy,p->price); 
+ } 
+ fclose(fp); 
+ printf(" 注意:   已将图书数据保存到 data.txt 文件!\n\n\n"); 
+}   
+/*录入操作*/
+void Insert(struct booklist *head) 
+{ 
+ /*定义结构体指针变量 s指向开辟的新结点首地址 p为中间变量*/
+ struct booklist *s, *p; 
+ char flag='Y'; /*定义目标函数,方便用户选择重复输入*/
+ p=head; 
+ /*遍历到尾结点，p指向尾结点*/
+ while(p->next!=NULL) 
+ { 
+ p=p->next; 
+ }  
+ /*开辟新空间,存入数据,添加进链表*/
+ while(flag=='Y'||flag=='y') //当选择y或Y键时，则进行如下操作
+ { 
+ s=(struct booklist *)malloc(sizeof(struct booklist)); 
+ printf("     \n请输入图书登陆号:"); 
+ scanf("%s",s->number); 
+ printf("     \n请输入图书书名:");  
+ scanf("%s",s->bookname); 
+ printf("     \n请输入图书作者名:");  
+ scanf("%s",s->writer); 
+ printf("     \n请输入图书出版社:");  
+ scanf("%s",s->press); 
+ printf("     \n请输入图书出版时间:"); 
+ scanf("%s",s->time); 
+ printf("     \n请输入图书分类号:");  
+ scanf("%s",s->classfy); 
+ printf("     \n请输入图书价格:"); 
+ scanf("%f",&s->price); 
+ printf("\n"); 
+ p->next=s; /*将新增加的节点添加进链表*/
+  p=s; /*p指向尾节点，向后移*/
+ s->next=NULL; 
+ printf("━━━━ 添加成功！━━━━\n\n"); 
+ printf("\n是否继续添加？(Y(是)/N(否)):");
+ fflush(stdin);
+ scanf("%c",&flag); 
+ printf("\n"); 
+ if(flag=='N'||flag=='n') 
+ {
+	 break;
+ } 
+ else if(flag=='Y'||flag=='y') 
+ {
+	 continue;
+ } 
+ } 
+ Store(head); /*保存数据至文件*/
+ return; 
+}  
+/*查询操作，按书名查找*/ 
+void Search(struct booklist *head) 
+{ 
+ struct booklist *p; 
+ char temp[20]; 
+ p=head; 
+ if(head==NULL || head->next==NULL) /*判断数据库是否为空*/
+ { 
+ printf(" ━━━━ 图书库为空！━━━━\n"); 
+ } 
+ else
+ { 
+ printf("请输入您要查找的书名: ");  
+ scanf("%s",temp); 
+ /*指针从头节点开始移动，遍历至尾结点，查找书目信息*/
+ while(p->next!=NULL) 
+ { 
+ p=p->next; 
+ if(strcmp(p->bookname,temp)==0)//运用字符串比较函数 
+ { 
+ printf("\n图书已找到!\n"); 
+ //显示查询书本的信息
+ printf("登录号: %s\t\n",p->number); 
+ printf("书名: %s\t\n",p->bookname); 
+ printf("作者名: %s\t\n",p->writer); 
+ printf("出版单位: %s\t\n",p->press); 
+ printf("出版时间: %s\t\n",p->time); 
+ printf("分类号: %s\t\n",p->classfy); 
+ printf("价格: %.2f\t\n",p->price); 
+ } 
+ if(p->next==NULL) 
+ { 
+ printf("\n查询完毕!\n"); 
+ } 
+ } 
+ } 
+ return; 
+} 
+ /*浏览操作*/  
+void Look(struct booklist * head) 
+{ 
+ struct booklist *p; 
+ if(head==NULL||head->next==NULL) /*判断数据库是否为空*/
+ { 
+ printf("\n      ━━━━ 没有图书记录! ━━━━\n\n"); 
+ return; 
+ } 
+ p=head;  
+ printf("┃登录号┃ 书 名 ┃ 作  者┃ 出版单位 ┃ 出版时间 ┃分类号┃ 价格 ┃\n"); 
+ /*指针从头节点开始移动，遍历至尾结点，依次输出图书信息*/
+ while(p->next!=NULL) 
+ { 
+ p=p->next; 
+ printf("┃   %s  ┃  %s  ┃    %s   ┃    %s    ┃   %s   ┃     %s     ┃     %f    ┃\n",p->number,p->bookname,p->writer,p->press,p->time,p->classfy,p->price); /*循环输出表格*/
+ } 
+ printf("\n"); 
+}  
+/*删除操作*/
+void Delete(struct booklist *head) 
+{ 
+ struct booklist *s,*p; /*s为中间变量，p为遍历时使用的指针*/
+ char temp[20]; 
+ int k; /*此变量用于判断是否找到了书目*/
+ k=0; 
+ p=s=head; 
+ printf("      [请输入您要删除的书名]:"); 
+ scanf("%s",temp); 
+ /*遍历到尾结点*/
+ while(p!= NULL) 
+ { 
+ if(strcmp(p->bookname,temp)==0) 
+ { 
+ k++; 
+ break; 
+ } 
+ p=p->next; 
+ } 
+ if(k==1) 
+ { 
+ for(;s->next!=p;) /*找到所需删除卡号结点的上一个结点，用for循环结构*/
+ { 
+ s=s->next; 
+ } 
+ s->next=p->next; /*将后一节点地址赋值给前一节点的指针域*/
+ free(p); 
+ printf("\n ━━━━ 删除成功! ━━━━\n"); 
+ } 
+ else /*未找到相应书目*/
+ { 
+ printf("您输入的书目不存在，请确认后输入!\n"); 
+ } 
+ return; 
+}  
+void main() 
+{ 
+ struct booklist *head;//定义头指针 
+ char choice; 
+ head=NULL; 
+ while(true) /*实现反复输入选择*/
+ {  
+ printf("                           *********************图书信息管理系统********************** \n\n\n   ");
+
+
+ printf("                        ---------------------------------------------------------                                                         \n\n");
+ printf("                            |                    [1]图书信息录入                    |\n\n"); 
+ printf("                            |                    [2]图书信息浏览                    |\n\n");  
+ printf("                            |                    [3]图书信息查询                    |\n\n");  
+ printf("                            |                    [4]图书信息删除                    |\n\n"); 
+ printf("                            |                    [5]退出系统                        |\n\n");
+ printf("                           ----------------------------------------------------------\n");
+ printf("请选择选项:");
+ fflush(stdin);
+ scanf("%c",&choice); 
+ if(choice=='1')//通过功能函数实现图书信息管理系统 
+ { 
+ if(head==NULL) 
+ { 
+ head=CreateBK(); 
+ } 
+ Insert(head);   
+ } 
+ else if(choice=='2') 
+ { 
+ Look(head); 
+ } 
+ else if(choice=='3') 
+ { 
+ Search(head); 
+ } 
+ else if(choice=='4') 
+ { 
+	 Delete(head); 
+ }   
+ else if(choice=='5') 
+ { 
+ printf("\n"); 
+ printf("   ━━━━━━━━ 感谢使用图书管理系统 ━━━━━━━━\n"); 
+ break; 
+ } 
+ else
+ { 
+ printf("     ━━━━ 输入错误，请重新输入！━━━━\n"); 
+  
+ } 
+ }   
+}  
